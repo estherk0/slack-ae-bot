@@ -3,6 +3,7 @@ package routes
 import (
 	"net/http"
 
+	"github.com/estherk0/slack-ae-bot/pkg/routes/command"
 	"github.com/estherk0/slack-ae-bot/pkg/routes/events"
 	"github.com/gin-gonic/gin"
 )
@@ -15,4 +16,5 @@ func Register(r *gin.Engine) {
 	})
 	rootGroup := r.Group("/")
 	events.Register(rootGroup, nil)
+	command.Register(rootGroup, nil)
 }

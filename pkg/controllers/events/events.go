@@ -21,7 +21,6 @@ var (
 	api = slack.New(config.SlackToken)
 )
 
-// CampaignController -
 type controller struct {
 }
 
