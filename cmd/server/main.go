@@ -7,12 +7,13 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"os"
 
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
 )
 
-var api = slack.New("xoxb-31642232595-2847645974416-ZL1w7732yHQpVLKkOZPYuAoT")
+var api = slack.New(os.Getenv("SLACK_TOKEN"))
 
 func main() {
 	var (
