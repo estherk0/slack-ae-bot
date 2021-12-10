@@ -24,10 +24,8 @@ func main() {
 		Handler: engine,
 	}
 
-	go func() {
-		if err := server.ListenAndServe(); err != nil {
-			logrus.Fatalf("ListenAndServe has been failed. Error %s", err.Error())
-			panic(err)
-		}
-	}()
+	if err := server.ListenAndServe(); err != nil {
+		logrus.Fatalf("ListenAndServe has been failed. Error %s", err.Error())
+		panic(err)
+	}
 }

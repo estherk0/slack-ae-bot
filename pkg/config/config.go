@@ -5,6 +5,11 @@ import (
 )
 
 var (
-	SlackSigningSecret = os.Getenv("SLACK_SIGNING_SECRET")
-	SlackToken         = os.Getenv("SLACK_TOKEN")
+	SlackSigningSecret string
+	SlackToken         string
 )
+
+func init() {
+	SlackSigningSecret = os.Getenv("SLACK_SIGNING_SECRET")
+	SlackToken = os.Getenv("SLACK_TOKEN")
+}
