@@ -62,10 +62,11 @@ func (ctrl *controller) HandleEvents(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{})
 		return
 	}
-	logrus.Debugln("Received event type:", eventsAPIEvent.Type)
 	if eventsAPIEvent.Type == slackevents.CallbackEvent {
 		innerEvent := eventsAPIEvent.InnerEvent
 		switch ev := innerEvent.Data.(type) {
+		default:
+			logrus.Debugln("event callback type: %T", ev)
 		case *slackevents.AppMentionEvent:
 			api.PostMessage(ev.Channel, slack.MsgOptionText("Yes, hello.", false))
 		}
