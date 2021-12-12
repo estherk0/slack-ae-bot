@@ -64,7 +64,7 @@ func (s *service) AddUserKarma(event *slackevents.MessageEvent) error {
 		if err := s.karmaRepository.AddUserKarma(ctx, season.SeasonID, receiverID, receiverKarma); err != nil {
 			return err
 		}
-		resultMessage += fmt.Sprintf("<@%s> has gained %0.1f karam.\n", receiverID, receiverKarma)
+		resultMessage += fmt.Sprintf("<@%s> has gained %0.1f karma.\n", receiverID, receiverKarma)
 		totalReceiverCount += 1
 	}
 	if totalReceiverCount != 0 {
