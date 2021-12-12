@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	api = slack.New(config.SlackToken)
+	client = slack.New(config.SlackToken)
 )
 
 type Service interface {
@@ -25,6 +25,6 @@ func CreateService() Service {
 }
 
 func (svc *service) PostMessage(channelID, text string) error {
-	_, _, err := api.PostMessage(channelID, slack.MsgOptionText(text, false))
+	_, _, err := client.PostMessage(channelID, slack.MsgOptionText(text, false))
 	return err
 }

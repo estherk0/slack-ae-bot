@@ -15,7 +15,7 @@ import (
 	"github.com/slack-go/slack/slackevents"
 )
 
-const karmaMessagePattern = `<@\w+> \+\+`
+const karmaMessagePattern = `<@\w+>\s*\+\+`
 
 //go:generate mockery --name=Controller
 type Controller interface {
@@ -87,11 +87,14 @@ func (ctrl *controller) appMentionEvent(event *slackevents.AppMentionEvent) {
 
 func (ctrl *controller) messageEvent(event *slackevents.MessageEvent) {
 	logrus.Debugln("Message Event received! ", event.BotID, event.User, event.Channel)
-	if event.BotID == "" { // Ignore bot message
+	if event.BotID != "" { // Ignore bot message
 		return
 	}
 	re, _ := regexp.Compile(karmaMessagePattern)
 	if re.MatchString(event.Text) {
-		ctrl.karmaService.AddUserKarma(event)
+		err := ctrl.karmaService.AddUserKarma(event)
+		if err != nil {
+			logrus.Error("add user karma has failed due to error: ", err.Error())
+		}
 	}
 }
