@@ -42,6 +42,7 @@ func CreateService() Service {
 
 // Add only 1 karma to receiver
 func (s *service) AddUserKarma(event *slackevents.MessageEvent) error {
+	totalReceiverCount := 0
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	season, err := s.karmaRepository.GetCurrentSeason(ctx)
@@ -56,22 +57,23 @@ func (s *service) AddUserKarma(event *slackevents.MessageEvent) error {
 	matches := r.FindAllString(text, -1)
 	for _, m := range matches {
 		receiverID := m[2 : len(m)-3]
-		logrus.Debugf("receiverID %s \n", receiverID)
-
 		if receiverID == giverID {
-			resultMessage += fmt.Sprintf("Sorry, <@%s>. You are not allowed to give karma yourself.", giverID)
+			resultMessage += fmt.Sprintf("Sorry, <@%s>. You are not allowed to give karma yourself.\n", giverID)
 			continue
 		}
 		if err := s.karmaRepository.AddUserKarma(ctx, season.SeasonID, receiverID, receiverKarma); err != nil {
 			return err
 		}
 		resultMessage += fmt.Sprintf("<@%s> has gained %0.1f karam.\n", receiverID, receiverKarma)
+		totalReceiverCount += 1
 	}
-	if err = s.karmaRepository.AddUserKarma(ctx, season.SeasonID, giverID, giverKarma); err != nil {
-		logrus.Debug("failed to add point to giver ", giverID)
-		return err
+	if totalReceiverCount != 0 {
+		if err = s.karmaRepository.AddUserKarma(ctx, season.SeasonID, giverID, giverKarma); err != nil {
+			logrus.Error("failed to add point to giver ", giverID)
+		} else {
+			resultMessage += fmt.Sprintf("<@%s> has gained %0.1f karma.\n", giverID, giverKarma)
+		}
 	}
-	resultMessage += fmt.Sprintf("<@%s> has gained %0.1f karma.\n", giverID, giverKarma)
 	s.slackapiService.PostMessage(event.Channel, resultMessage)
 	return nil
 }

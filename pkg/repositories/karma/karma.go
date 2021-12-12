@@ -26,8 +26,9 @@ func (r *repository) AddUserKarma(ctx context.Context, seasonID int, userID stri
 				logrus.Errorf("failed to create user %s, error: ", userID, err.Error())
 				return err
 			}
+		} else {
+			return res.Err()
 		}
-		return res.Err()
 	}
 
 	return nil
