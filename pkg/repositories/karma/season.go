@@ -29,8 +29,10 @@ func (r *repository) FinishCurrentSeason(ctx context.Context) error {
 	res, err := r.seasonCollection.UpdateOne(ctx,
 		bson.M{"in_progress": true},
 		bson.M{
-			"in_progress": false,
-			"finished_at": time.Now(),
+			"$set": bson.M{
+				"in_progress": false,
+				"finished_at": time.Now(),
+			},
 		},
 	)
 	if err != nil {
@@ -61,6 +63,6 @@ func (r *repository) StartNewSeason(ctx context.Context) (int64, error) {
 	if err != nil {
 		return -1, err
 	}
-	logrus.Info("new season started season id: ", season.SeasonID)
+	logrus.Info("new season started season id: ", newSeasonID)
 	return newSeasonID, nil
 }
