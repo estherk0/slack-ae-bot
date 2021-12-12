@@ -1,19 +1,33 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
 	"path"
 	"runtime"
+	"time"
 
+	"github.com/estherk0/slack-ae-bot/pkg/db"
 	"github.com/estherk0/slack-ae-bot/pkg/routes"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
 
 func main() {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer func() {
+		db.Close(ctx)
+		cancel()
+	}()
+
 	setLogger()
+
+	// mongo db
+	db.Initialize(ctx)
+
+	// gin server
 	engine := gin.Default()
 	engine.Use(gin.Recovery())
 	routes.Register(engine)
