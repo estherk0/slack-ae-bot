@@ -11,6 +11,8 @@ import (
 type Repository interface {
 	AddUserKarma(ctx context.Context, seasonID int, userID string, karma float64) error
 	GetCurrentSeason(ctx context.Context) (*karma.Season, error)
+	StartNewSeason(ctx context.Context) (int64, error)
+	FinishCurrentSeason(ctx context.Context) error
 }
 
 type repository struct {
