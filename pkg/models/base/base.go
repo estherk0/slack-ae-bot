@@ -11,3 +11,11 @@ type BaseModel struct {
 	CreatedAt time.Time     `bson:"created_at" json:"created_at"`
 	UpdatedAt time.Time     `bson:"updated_at" json:"updated_at"`
 }
+
+func (b *BaseModel) SetCreated(t time.Time) {
+	b.CreatedAt = t
+}
+
+func (b *BaseModel) SetModified(t time.Time) {
+	b.UpdatedAt = t
+}

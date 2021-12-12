@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"regexp"
+	"strings"
 
 	"github.com/estherk0/slack-ae-bot/pkg/config"
 	"github.com/estherk0/slack-ae-bot/pkg/services/karma"
@@ -82,7 +83,17 @@ func (ctrl *controller) HandleEvents(c *gin.Context) {
 }
 
 func (ctrl *controller) appMentionEvent(event *slackevents.AppMentionEvent) {
-	ctrl.slackapiService.PostMessage(event.Channel, "Yes, hello.")
+	if strings.Contains(event.Text, "karma") {
+		if strings.Contains(event.Text, "season") {
+			if strings.Contains(event.Text, "start") {
+				ctrl.karmaService.StartSeason(event)
+			} else if strings.Contains(event.Text, "finish") || strings.Contains(event.Text, "end") {
+				ctrl.karmaService.FinishSeason(event)
+			}
+		}
+	} else {
+		ctrl.slackapiService.PostMessage(event.Channel, "Sorry, I don't understand what you are saying. :sob:")
+	}
 }
 
 func (ctrl *controller) messageEvent(event *slackevents.MessageEvent) {
