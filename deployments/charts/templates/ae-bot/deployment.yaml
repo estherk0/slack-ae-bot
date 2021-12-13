@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: slack-ae-bot
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: slack-ae-bot
+  revisionHistoryLimit: 10
+  minReadySeconds: 0
+  template:
+    metadata:
+      labels:
+        app: slack-ae-bot
+    spec:
+      containers:
+        - name: server
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: SLACK_TOKEN
+              value: {{ .Values.env.slackToken }}
+            - name: SLACK_SIGNING_SECRET
+              value: {{ .Values.env.slackSigningSecret }}
+            - name: DB_HOST
+              value: {{ .Values.env.db.host }}
+            - name: DB_PORT
+              value: {{ .Values.env.db.port | quote }}
+            - name: DB_USERNAME
+              value: {{ .Values.env.db.username }}
+            - name: DB_PASSWORD
+              value: {{ .Values.env.db.password }}
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP

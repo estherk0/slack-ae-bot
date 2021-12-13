@@ -1,0 +1,29 @@
+clusterName: cluster.local
+
+externalDomainURL: slack-ae-bot.io
+replicas: 1
+image:
+  repository: ghcr.io/estherk0/slack-ae-bot
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: main
+
+imagePullSecrets: []
+
+ingressGatewaySelector:
+  istio: ingressgateway
+
+env:
+  slackToken: abcdefghi
+  slackSigningSecret: secretToken
+  db:
+    host: mongo
+    port: "27017"
+    username: root
+    password: kwangya
+
+mongodb:
+  storageClassName: ebs
+  storageSize: 10Gi
+  username: root
+  password: kwangya
