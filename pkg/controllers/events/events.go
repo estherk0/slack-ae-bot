@@ -70,7 +70,16 @@ func (ctrl *controller) HandleEvents(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{})
 		return
 	}
-	if eventsAPIEvent.Type == slackevents.CallbackEvent {
+	if eventsAPIEvent.Type == slackevents.URLVerification {
+		var r *slackevents.ChallengeResponse
+		err := json.Unmarshal([]byte(body), &r)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{})
+			return
+		}
+		c.Writer.Header().Set("Content-Type", "text")
+		c.JSON(http.StatusOK, r.Challenge)
+	} else if eventsAPIEvent.Type == slackevents.CallbackEvent {
 		innerEvent := eventsAPIEvent.InnerEvent
 		switch ev := innerEvent.Data.(type) {
 		case *slackevents.AppMentionEvent:
@@ -78,8 +87,10 @@ func (ctrl *controller) HandleEvents(c *gin.Context) {
 		case *slackevents.MessageEvent:
 			ctrl.messageEvent(ev)
 		}
+		c.JSON(http.StatusOK, gin.H{})
 	}
-	c.JSON(http.StatusOK, gin.H{})
+	logrus.Errorf("unknown event api type %s", eventsAPIEvent.Type)
+	c.JSON(http.StatusInternalServerError, gin.H{})
 }
 
 func (ctrl *controller) appMentionEvent(event *slackevents.AppMentionEvent) {
