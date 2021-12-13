@@ -32,6 +32,8 @@ spec:
               value: {{ .Values.env.db.username }}
             - name: DB_PASSWORD
               value: {{ .Values.env.db.password }}
+            - name: DB_NAME
+              value: {{ .Values.env.db.name }}
           ports:
             - name: http
               containerPort: 3000

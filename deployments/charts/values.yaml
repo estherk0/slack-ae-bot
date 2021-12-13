@@ -21,6 +21,7 @@ env:
     port: "27017"
     username: root
     password: kwangya
+    name : ae
 
 mongodb:
   storageClassName: ebs
