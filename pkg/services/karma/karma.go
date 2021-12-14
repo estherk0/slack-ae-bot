@@ -67,6 +67,7 @@ func (s *service) AddUserKarma(event *slackevents.MessageEvent) error {
 			resultMessage += fmt.Sprintf("I don't need karma, <@%s>. But I appreciate the thought.\n", giverID)
 			continue
 		}
+		logrus.Debugf("Receiver ID !!!", receiverID)
 		if err := s.karmaRepository.AddUserKarma(ctx, season.SeasonID, receiverID, receiverKarma); err != nil {
 			return err
 		}
