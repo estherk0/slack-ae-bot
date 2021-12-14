@@ -114,15 +114,19 @@ func (ctrl *controller) HandleEvents(c *gin.Context) {
 }
 
 func (ctrl *controller) appMentionEvent(event *slackevents.AppMentionEvent) {
-	if strings.Contains(event.Text, "karma") {
+	if strings.Contains(event.Text, "karma") { // karma
 		if strings.Contains(event.Text, "season") {
 			if strings.Contains(event.Text, "start") {
 				ctrl.karmaService.StartSeason(event)
 			} else if strings.Contains(event.Text, "finish") || strings.Contains(event.Text, "end") {
 				ctrl.karmaService.FinishSeason(event)
 			}
+		} else if strings.Contains(event.Text, "my") {
+			if err := ctrl.karmaService.GetUserKarma(event); err != nil {
+				logrus.Errorf("GetUserKarma error %s", err.Error())
+			}
 		}
-	} else if strings.Contains(event.Text, "??") {
+	} else if strings.Contains(event.Text, "??") { // decision maker
 		ctrl.decisionmakerService.MakeDecision(event)
 	} else {
 		ctrl.unknownCommandResponse(event)

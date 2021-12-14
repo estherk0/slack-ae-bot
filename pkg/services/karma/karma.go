@@ -20,6 +20,7 @@ const (
 
 type Service interface {
 	AddUserKarma(event *slackevents.MessageEvent) error
+	GetUserKarma(event *slackevents.AppMentionEvent) error
 	StartSeason(event *slackevents.AppMentionEvent) error
 	FinishSeason(event *slackevents.AppMentionEvent) error
 }
@@ -81,6 +82,22 @@ func (s *service) AddUserKarma(event *slackevents.MessageEvent) error {
 		}
 	}
 	s.slackapiService.PostMessage(event.Channel, resultMessage)
+	return nil
+}
+
+func (s *service) GetUserKarma(event *slackevents.AppMentionEvent) error {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	season, err := s.karmaRepository.GetCurrentSeason(ctx)
+	if err != nil {
+		logrus.Errorln("GetCurrentSeason error: ", err.Error())
+	}
+	karma, err := s.karmaRepository.GetUserKarma(ctx, season.SeasonID, event.User)
+	if err != nil {
+		return err
+	}
+	msg := fmt.Sprintf("<@%s>'s karma is %0.1f", event.User, karma)
+	s.slackapiService.PostMessage(event.Channel, msg)
 	return nil
 }
 

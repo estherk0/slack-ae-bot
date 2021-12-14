@@ -3,6 +3,7 @@ package karma
 import (
 	"context"
 
+	"github.com/estherk0/slack-ae-bot/pkg/models/karma"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gopkg.in/mgo.v2/bson"
@@ -33,7 +34,25 @@ func (r *repository) AddUserKarma(ctx context.Context, seasonID int, userID stri
 
 	return nil
 }
-
+func (r *repository) GetUserKarma(ctx context.Context, seasonID int, userID string) (float64, error) {
+	res := r.userCollection.FindOne(ctx,
+		bson.M{
+			"season_id": seasonID,
+			"user_id":   userID,
+		})
+	if res.Err() != nil {
+		if res.Err() == mongo.ErrNoDocuments {
+			return 0, nil
+		} else {
+			return -1, res.Err()
+		}
+	}
+	user := new(karma.User)
+	if err := res.Decode(&user); err != nil {
+		return -1, err
+	}
+	return user.Karma, nil
+}
 func (r *repository) createUser(ctx context.Context, seasonID int, userID string, karma float64) error {
 	res, err := r.userCollection.InsertOne(ctx,
 		bson.M{
