@@ -23,9 +23,13 @@ import (
 const karmaMessagePattern = `<@\w+>\s*\+\+`
 
 var randomResponse = [...]string{
-	"Sorry, I don't understand what you are saying. <@%s> :sob:",
-	"Don't bother me. <@%s> :blobdizzy:",
-	"Please don't say anything more. <@%s> :no_mouth:",
+	"Sorry, I don't understand what you are saying. :sob:",
+	"Don't bother me. :blobdizzy:",
+	"Please don't say anything more. :no_mouth:",
+	"I am trying to understand your language.",
+	"Naevis, calling.",
+	"Don't you know I am a savage? :sunglasses:",
+	"(zu zu zu zu)",
 }
 
 //go:generate mockery --name=Controller
@@ -144,7 +148,7 @@ func (ctrl *controller) unknownCommandResponse(event *slackevents.AppMentionEven
 	decisionCount := len(randomResponse)
 	randSource := rand.NewSource(time.Now().UnixNano())
 	r1 := rand.New(randSource)
-	idx := r1.Intn(100) % decisionCount
+	idx := r1.Intn(10000) % decisionCount
 	msg := fmt.Sprintf(randomResponse[idx], event.User)
 	ctrl.slackapiService.PostMessage(event.Channel, msg)
 }
