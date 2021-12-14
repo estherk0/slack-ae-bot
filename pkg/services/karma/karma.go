@@ -15,7 +15,7 @@ import (
 const (
 	receiverKarma = 1.0
 	giverKarma    = 0.3
-	botID         = "B02QA5TMQDA"
+	botID         = "U02QXJZUNC8"
 )
 
 type Service interface {
@@ -67,7 +67,6 @@ func (s *service) AddUserKarma(event *slackevents.MessageEvent) error {
 			resultMessage += fmt.Sprintf("I don't need karma, <@%s>. But I appreciate the thought.\n", giverID)
 			continue
 		}
-		logrus.Debugf("Receiver ID !!!", receiverID)
 		if err := s.karmaRepository.AddUserKarma(ctx, season.SeasonID, receiverID, receiverKarma); err != nil {
 			return err
 		}
