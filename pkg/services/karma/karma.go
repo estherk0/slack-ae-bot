@@ -15,6 +15,7 @@ import (
 const (
 	receiverKarma = 1.0
 	giverKarma    = 0.3
+	botID         = "B02QA5TMQDA"
 )
 
 type Service interface {
@@ -61,6 +62,9 @@ func (s *service) AddUserKarma(event *slackevents.MessageEvent) error {
 		receiverID := m[2 : len(m)-3]
 		if receiverID == giverID {
 			resultMessage += fmt.Sprintf("Sorry, <@%s>. You are not allowed to give karma yourself.\n", giverID)
+			continue
+		} else if receiverID == botID {
+			resultMessage += fmt.Sprintf("I don't need karma, <@%s>. But I appreciate the thought.\n", giverID)
 			continue
 		}
 		if err := s.karmaRepository.AddUserKarma(ctx, season.SeasonID, receiverID, receiverKarma); err != nil {
