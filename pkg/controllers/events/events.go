@@ -2,7 +2,6 @@ package events
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
@@ -149,6 +148,5 @@ func (ctrl *controller) unknownCommandResponse(event *slackevents.AppMentionEven
 	randSource := rand.NewSource(time.Now().UnixNano())
 	r1 := rand.New(randSource)
 	idx := r1.Intn(10000) % decisionCount
-	msg := fmt.Sprintf(randomResponse[idx], event.User)
-	ctrl.slackapiService.PostMessage(event.Channel, msg)
+	ctrl.slackapiService.PostMessage(event.Channel, randomResponse[idx])
 }
