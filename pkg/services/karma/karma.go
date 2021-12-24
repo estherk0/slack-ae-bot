@@ -124,6 +124,11 @@ func (s *service) GetTopKarmaUsers(event *slackevents.AppMentionEvent) error {
 		logrus.Errorln("GetTopKarmaUsers failed to get top users. error: ", err.Error())
 		return err
 	}
+
+	// debug
+	for i, user := range users {
+		logrus.Infoln("rank", i, "ID", user.ID, "karma", user.Karma)
+	}
 	t, err := template.New("karma top template").Parse(karmaTopTmpl)
 	if err != nil {
 		logrus.Errorln("GetTopKarmaUsers failed to template error ", err.Error())
