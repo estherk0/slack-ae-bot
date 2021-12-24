@@ -11,6 +11,7 @@ var (
 
 type Service interface {
 	PostMessage(channelID, text string) error
+	GetUserInfo(userID string) (*slack.User, error)
 }
 
 type service struct {
@@ -27,4 +28,8 @@ func CreateService() Service {
 func (svc *service) PostMessage(channelID, text string) error {
 	_, _, err := client.PostMessage(channelID, slack.MsgOptionText(text, false))
 	return err
+}
+
+func (svc *service) GetUserInfo(userID string) (*slack.User, error) {
+	return client.GetUserInfo(userID)
 }

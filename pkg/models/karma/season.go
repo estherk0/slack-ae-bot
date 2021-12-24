@@ -9,7 +9,14 @@ import (
 type Season struct {
 	base.BaseModel `bson:",inline" json:",inline"`
 
-	SeasonID   int       `bson:"season_id" json:"season_id"`
-	FinishedAt time.Time `bson:"finished_at" json:"finished_at"`
-	InProgress bool      `bson:"in_progress" json:"in_progress"`
+	SeasonID   int          `bson:"season_id" json:"season_id"`
+	FinishedAt time.Time    `bson:"finished_at" json:"finished_at"`
+	InProgress bool         `bson:"in_progress" json:"in_progress"`
+	RankResult []RankResult `bson:"result" json:"result"`
+}
+
+type RankResult struct {
+	UserID string
+	Rank   int
+	Karma  float64
 }

@@ -1,11 +1,14 @@
 package karma
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"regexp"
 	"strings"
+	"text/template"
 
+	karmamodel "github.com/estherk0/slack-ae-bot/pkg/models/karma"
 	"github.com/estherk0/slack-ae-bot/pkg/repositories/karma"
 	"github.com/estherk0/slack-ae-bot/pkg/services/slackapi"
 	"github.com/sirupsen/logrus"
@@ -23,6 +26,7 @@ type Service interface {
 	GetUserKarma(event *slackevents.AppMentionEvent) error
 	StartSeason(event *slackevents.AppMentionEvent) error
 	FinishSeason(event *slackevents.AppMentionEvent) error
+	GetTopKarmaUsers(event *slackevents.AppMentionEvent) error
 }
 
 type service struct {
@@ -43,6 +47,12 @@ func CreateService() Service {
 		karma.CreateRepository(),
 	)
 }
+
+const karmaTopTmpl = `:mega: Karma Season #{{ .SeasonID }} Ranking!
+{{- range $index, $user := .Users }}
+    Rank {{ $index +1 }} <@{{ $user.UserID }}> Karma: {{ $user.Karma }}
+{{- end }}
+`
 
 // Add only 1 karma to receiver
 func (s *service) AddUserKarma(event *slackevents.MessageEvent) error {
@@ -101,33 +111,36 @@ func (s *service) GetUserKarma(event *slackevents.AppMentionEvent) error {
 	return nil
 }
 
-func (s *service) StartSeason(event *slackevents.AppMentionEvent) error {
+func (s *service) GetTopKarmaUsers(event *slackevents.AppMentionEvent) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	seasonID, err := s.karmaRepository.StartNewSeason(ctx)
+	season, err := s.karmaRepository.GetCurrentSeason(ctx)
 	if err != nil {
-		msg := fmt.Sprintf("Failed to start new season because of error: %s", err.Error())
-		s.slackapiService.PostMessage(event.Channel, msg)
+		logrus.Errorln("GetTopKarmaUsers failed to get season. error: ", err.Error())
 		return err
 	}
-	msg := fmt.Sprintf(":tada: New Season #%d started! :tada:", seasonID)
-	s.slackapiService.PostMessage(event.Channel, msg)
-	return nil
-}
-
-func (s *service) FinishSeason(event *slackevents.AppMentionEvent) error {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	currentSeason, err := s.karmaRepository.GetCurrentSeason(ctx)
+	users, err := s.karmaRepository.GetSortedUsers(ctx, season.SeasonID, 10)
 	if err != nil {
-		s.slackapiService.PostMessage(event.Channel, "I couldn't find active season. :persevere: Am I wrong?")
+		logrus.Errorln("GetTopKarmaUsers failed to get top users. error: ", err.Error())
 		return err
 	}
-	if err = s.karmaRepository.FinishCurrentSeason(ctx); err != nil {
-		s.slackapiService.PostMessage(event.Channel, "I was trying to finish season. But I failed. Help!")
+	t, err := template.New("karma top template").Parse(karmaTopTmpl)
+	if err != nil {
+		logrus.Errorln("GetTopKarmaUsers failed to template error ", err.Error())
 		return err
 	}
-	msg := fmt.Sprintf("Season #%d is finished. :partying_face:. Please check your rank and reward.", currentSeason.SeasonID)
-	s.slackapiService.PostMessage(event.Channel, msg)
+	var tpl bytes.Buffer
+	res := struct {
+		Users    []karmamodel.User
+		SeasonID int
+	}{
+		users,
+		season.SeasonID,
+	}
+	t.Execute(&tpl, res)
+	if err = s.slackapiService.PostMessage(event.Channel, tpl.String()); err != nil {
+		logrus.Errorln("GetTopKarmaUsers failed to send message. error: ", err.Error())
+		return err
+	}
 	return nil
 }

@@ -14,6 +14,7 @@ type Repository interface {
 	GetCurrentSeason(ctx context.Context) (*karma.Season, error)
 	StartNewSeason(ctx context.Context) (int64, error)
 	FinishCurrentSeason(ctx context.Context) error
+	GetSortedUsers(ctx context.Context, seasonID int, limit int64) ([]karma.User, error)
 }
 
 type repository struct {
