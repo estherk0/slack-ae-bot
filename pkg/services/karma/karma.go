@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"math"
 	"regexp"
 	"strings"
 	"text/template"
@@ -107,15 +108,18 @@ func (s *service) GetUserKarma(event *slackevents.AppMentionEvent) error {
 
 const karmaTopTmpl = `:mega: Karma Season #{{ .SeasonID }} Ranking!
 {{- range $index, $user := .Users }}
-    Rank {{ add $index 1 }}. <@{{ $user.UserID }}> Karma: {{ $user.Karma }}
+    Rank {{ add $index 1 }}. <@{{ $user.UserID }}> Karma: {{ round $user.Karma }}
 {{- end }}
 `
 
 func add(x, y int) int {
 	return x + y
 }
+func round(x float64) float64 {
+	return math.Round(x*100) / 100
+}
 
-var templateFuncs = template.FuncMap{"add": add}
+var templateFuncs = template.FuncMap{"add": add, "round": round}
 
 func (s *service) GetTopKarmaUsers(event *slackevents.AppMentionEvent) error {
 	ctx, cancel := context.WithCancel(context.Background())
