@@ -2,10 +2,12 @@ package karma
 
 import (
 	"context"
+	"log"
 
 	"github.com/estherk0/slack-ae-bot/pkg/models/karma"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -65,4 +67,30 @@ func (r *repository) createUser(ctx context.Context, seasonID int, userID string
 	}
 	logrus.Info("new karma_user created. id: ", res.InsertedID)
 	return nil
+}
+
+func (r *repository) GetSortedUsers(ctx context.Context, seasonID int, limit int64) ([]karma.User, error) {
+	findOptions := options.FindOptions{
+		Limit: &limit,
+		Sort: bson.M{
+			"karma": -1,
+		},
+	}
+	cursor, err := r.userCollection.Find(ctx,
+		bson.M{
+			"season_id": seasonID,
+		},
+		&findOptions,
+	)
+	if err != nil {
+		logrus.Fatalln("GetSortedUser fatal error: ", err.Error())
+		return nil, err
+	}
+
+	var users []karma.User
+	if err = cursor.All(ctx, &users); err != nil {
+		log.Fatalln("GetSortedUser failed to decode user: ", err.Error())
+		return nil, err
+	}
+	return users, nil
 }

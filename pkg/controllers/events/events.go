@@ -125,6 +125,8 @@ func (ctrl *controller) appMentionEvent(event *slackevents.AppMentionEvent) {
 			if err := ctrl.karmaService.GetUserKarma(event); err != nil {
 				logrus.Errorf("GetUserKarma error %s", err.Error())
 			}
+		} else if strings.Contains(event.Text, "top") { // karma current top list
+			ctrl.karmaService.GetTopKarmaUsers(event)
 		}
 	} else if strings.Contains(event.Text, "??") { // decision maker
 		ctrl.decisionmakerService.MakeDecision(event)
