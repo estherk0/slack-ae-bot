@@ -48,12 +48,6 @@ func CreateService() Service {
 	)
 }
 
-const karmaTopTmpl = `:mega: Karma Season #{{ .SeasonID }} Ranking!
-{{- range $index, $user := .Users }}
-    Rank {{ $index +1 }} <@{{ $user.UserID }}> Karma: {{ $user.Karma }}
-{{- end }}
-`
-
 // Add only 1 karma to receiver
 func (s *service) AddUserKarma(event *slackevents.MessageEvent) error {
 	totalReceiverCount := 0
@@ -111,6 +105,18 @@ func (s *service) GetUserKarma(event *slackevents.AppMentionEvent) error {
 	return nil
 }
 
+const karmaTopTmpl = `:mega: Karma Season #{{ .SeasonID }} Ranking!
+{{- range $index, $user := .Users }}
+    Rank {{ add $index 1 }}. <@{{ $user.UserID }}> Karma: {{ $user.Karma }}
+{{- end }}
+`
+
+func add(x, y int) int {
+	return x + y
+}
+
+var templateFuncs = template.FuncMap{"add": add}
+
 func (s *service) GetTopKarmaUsers(event *slackevents.AppMentionEvent) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -125,15 +131,7 @@ func (s *service) GetTopKarmaUsers(event *slackevents.AppMentionEvent) error {
 		return err
 	}
 
-	// debug
-	for i, user := range users {
-		logrus.Infoln("rank", i, "ID", user.ID, "karma", user.Karma)
-	}
-	t, err := template.New("karma top template").Parse(karmaTopTmpl)
-	if err != nil {
-		logrus.Errorln("GetTopKarmaUsers failed to template error ", err.Error())
-		return err
-	}
+	t := template.Must(template.New("karma top template").Funcs(templateFuncs).Parse(karmaTopTmpl))
 	var tpl bytes.Buffer
 	res := struct {
 		Users    []karmamodel.User
