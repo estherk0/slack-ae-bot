@@ -40,7 +40,7 @@ func (s *service) FinishSeason(event *slackevents.AppMentionEvent) error {
 	s.notifyKarmaRank(users, currentSeason.SeasonID, event.Channel)
 
 	go func() {
-		if err := s.processaAwardMedals(users, fmt.Sprintf("karma_season_%d", currentSeason.SeasonID)); err != nil {
+		if err := s.processAwardMedals(users, fmt.Sprintf("karma_season_%d", currentSeason.SeasonID)); err != nil {
 			logrus.Fatalln("Failed to award medals to rankers ", err.Error())
 		}
 	}()
@@ -54,7 +54,7 @@ func (s *service) FinishSeason(event *slackevents.AppMentionEvent) error {
 	return nil
 }
 
-func (s *service) processaAwardMedals(rankers []karma.User, source string) error {
+func (s *service) processAwardMedals(rankers []karma.User, source string) error {
 	ctx := context.Background()
 	for i, ranker := range rankers {
 		_, err := s.orgRepository.GetUser(ctx, ranker.UserID)
@@ -62,21 +62,21 @@ func (s *service) processaAwardMedals(rankers []karma.User, source string) error
 			if err == mongo.ErrNoDocuments {
 				slackUser, err := s.slackapiService.GetUserInfo(ranker.UserID)
 				if err != nil {
-					logrus.Errorln("Failed to get user info ", err.Error())
+					logrus.Errorf("Failed to get user info %s, index %d\n", err.Error(), i)
 					return err
 				}
 				_, err = s.orgRepository.RegisterUser(ctx, ranker.UserID, slackUser.TeamID, slackUser.Name, slackUser.RealName)
 				if err != nil {
-					logrus.Errorln("Failed to register user info ", err.Error())
+					logrus.Errorf("Failed to register user info %s, index %d\n", err.Error(), i)
 					return err
 				}
 			} else {
-				logrus.Errorln("Failed to get user info ", err.Error())
+				logrus.Errorf("Failed to get user info %s, index %d\n", err.Error(), i)
 				return err
 			}
 		}
 		if err = s.orgRepository.AwardMedalToUser(ctx, ranker.UserID, source, getMedalType(i)); err != nil {
-			logrus.Errorln("Failed to award medal to user %s", err.Error())
+			logrus.Errorf("Failed to award medal to user %s, index %d\n", err.Error(), i)
 			return err
 		}
 
