@@ -36,7 +36,7 @@ func (r *repository) AddUserKarma(ctx context.Context, seasonID int, userID stri
 
 	return nil
 }
-func (r *repository) GetUserKarma(ctx context.Context, seasonID int, userID string) (float64, error) {
+func (r *repository) GetKarmaOfUser(ctx context.Context, seasonID int, userID string) (float64, error) {
 	res := r.userCollection.FindOne(ctx,
 		bson.M{
 			"season_id": seasonID,
@@ -90,6 +90,21 @@ func (r *repository) GetSortedUsers(ctx context.Context, seasonID int, limit int
 	var users []karma.User
 	if err = cursor.All(ctx, &users); err != nil {
 		log.Fatalln("GetSortedUser failed to decode user: ", err.Error())
+		return nil, err
+	}
+	return users, nil
+}
+
+func (r *repository) GetUsers(ctx context.Context, seasonID int) ([]karma.User, error) {
+	cursor, err := r.userCollection.Find(ctx,
+		bson.M{
+			"season_id": seasonID,
+		})
+	if err != nil {
+		return nil, err
+	}
+	var users []karma.User
+	if err = cursor.All(ctx, &users); err != nil {
 		return nil, err
 	}
 	return users, nil
