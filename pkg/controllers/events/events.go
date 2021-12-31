@@ -122,8 +122,8 @@ func (ctrl *controller) appMentionEvent(event *slackevents.AppMentionEvent) {
 				ctrl.karmaService.FinishSeason(event)
 			}
 		} else if strings.Contains(event.Text, "my") {
-			if err := ctrl.karmaService.GetUserKarma(event); err != nil {
-				logrus.Errorf("GetUserKarma error %s", err.Error())
+			if err := ctrl.karmaService.GetKarmaOfUser(event); err != nil {
+				logrus.Errorf("GetKarmaOfUser error %s", err.Error())
 			}
 		} else if strings.Contains(event.Text, "top") { // karma current top list
 			ctrl.karmaService.GetTopKarmaUsers(event)

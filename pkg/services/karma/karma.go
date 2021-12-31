@@ -61,14 +61,14 @@ func (s *service) AddUserKarma(event *slackevents.MessageEvent) error {
 	return nil
 }
 
-func (s *service) GetUserKarma(event *slackevents.AppMentionEvent) error {
+func (s *service) GetKarmaOfUser(event *slackevents.AppMentionEvent) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	season, err := s.karmaRepository.GetCurrentSeason(ctx)
 	if err != nil {
 		logrus.Errorln("GetCurrentSeason error: ", err.Error())
 	}
-	karma, err := s.karmaRepository.GetUserKarma(ctx, season.SeasonID, event.User)
+	karma, err := s.karmaRepository.GetKarmaOfUser(ctx, season.SeasonID, event.User)
 	if err != nil {
 		return err
 	}

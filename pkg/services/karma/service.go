@@ -9,7 +9,7 @@ import (
 
 type Service interface {
 	AddUserKarma(event *slackevents.MessageEvent) error
-	GetUserKarma(event *slackevents.AppMentionEvent) error
+	GetKarmaOfUser(event *slackevents.AppMentionEvent) error
 	StartSeason(event *slackevents.AppMentionEvent) error
 	FinishSeason(event *slackevents.AppMentionEvent) error
 	GetTopKarmaUsers(event *slackevents.AppMentionEvent) error
