@@ -9,9 +9,7 @@ import (
 	"strings"
 	"text/template"
 
-	karmamodel "github.com/estherk0/slack-ae-bot/pkg/models/karma"
-	"github.com/estherk0/slack-ae-bot/pkg/repositories/karma"
-	"github.com/estherk0/slack-ae-bot/pkg/services/slackapi"
+	"github.com/estherk0/slack-ae-bot/pkg/models/karma"
 	"github.com/sirupsen/logrus"
 	"github.com/slack-go/slack/slackevents"
 )
@@ -21,33 +19,6 @@ const (
 	giverKarma    = 0.3
 	botID         = "U02QXJZUNC8"
 )
-
-type Service interface {
-	AddUserKarma(event *slackevents.MessageEvent) error
-	GetUserKarma(event *slackevents.AppMentionEvent) error
-	StartSeason(event *slackevents.AppMentionEvent) error
-	FinishSeason(event *slackevents.AppMentionEvent) error
-	GetTopKarmaUsers(event *slackevents.AppMentionEvent) error
-}
-
-type service struct {
-	slackapiService slackapi.Service
-	karmaRepository karma.Repository
-}
-
-func NewService(slackapiService slackapi.Service, karmaRepository karma.Repository) Service {
-	return &service{
-		slackapiService: slackapiService,
-		karmaRepository: karmaRepository,
-	}
-}
-
-func CreateService() Service {
-	return NewService(
-		slackapi.CreateService(),
-		karma.CreateRepository(),
-	)
-}
 
 // Add only 1 karma to receiver
 func (s *service) AddUserKarma(event *slackevents.MessageEvent) error {
@@ -119,8 +90,6 @@ func round(x float64) float64 {
 	return math.Round(x*100) / 100
 }
 
-var templateFuncs = template.FuncMap{"add": add, "round": round}
-
 func (s *service) GetTopKarmaUsers(event *slackevents.AppMentionEvent) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -135,18 +104,24 @@ func (s *service) GetTopKarmaUsers(event *slackevents.AppMentionEvent) error {
 		return err
 	}
 
+	return s.notifyKarmaRank(users, season.SeasonID, event.Channel)
+}
+
+var templateFuncs = template.FuncMap{"add": add, "round": round}
+
+func (s *service) notifyKarmaRank(users []karma.User, seasonID int, eventChannel string) error {
 	t := template.Must(template.New("karma top template").Funcs(templateFuncs).Parse(karmaTopTmpl))
 	var tpl bytes.Buffer
 	res := struct {
-		Users    []karmamodel.User
+		Users    []karma.User
 		SeasonID int
 	}{
 		users,
-		season.SeasonID,
+		seasonID,
 	}
 	t.Execute(&tpl, res)
-	if err = s.slackapiService.PostMessage(event.Channel, tpl.String()); err != nil {
-		logrus.Errorln("GetTopKarmaUsers failed to send message. error: ", err.Error())
+	if err := s.slackapiService.PostMessage(eventChannel, tpl.String()); err != nil {
+		logrus.Errorln("notifyKarmaRank failed to send message. error: ", err.Error())
 		return err
 	}
 	return nil
