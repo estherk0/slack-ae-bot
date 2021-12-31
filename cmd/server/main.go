@@ -11,6 +11,7 @@ import (
 
 	"github.com/estherk0/slack-ae-bot/pkg/db"
 	"github.com/estherk0/slack-ae-bot/pkg/routes"
+	"github.com/estherk0/slack-ae-bot/pkg/services/cronjob"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
@@ -42,6 +43,10 @@ func main() {
 		Handler: engine,
 	}
 
+	cronjobService := cronjob.CreateService()
+	cronjobService.Start()
+	defer cronjobService.Stop()
+
 	if err := server.ListenAndServe(); err != nil {
 		logrus.Fatalf("ListenAndServe has been failed. Error %s", err.Error())
 		panic(err)
@@ -67,4 +72,3 @@ func setLogger() {
 	}
 	logrus.SetOutput(os.Stdout)
 }
-
