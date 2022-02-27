@@ -26,7 +26,7 @@ func (r *repository) AddUserKarma(ctx context.Context, seasonID int, userID stri
 	if res.Err() != nil {
 		if res.Err() == mongo.ErrNoDocuments {
 			if err := r.createUser(ctx, seasonID, userID, karma); err != nil {
-				logrus.Errorf("failed to create user %s, error: ", userID, err.Error())
+				logrus.Errorf("[AddUserKarma] failed to create user %s, error: ", userID, err.Error())
 				return err
 			}
 		} else {
@@ -65,7 +65,7 @@ func (r *repository) createUser(ctx context.Context, seasonID int, userID string
 	if err != nil {
 		return err
 	}
-	logrus.Info("new karma_user created. id: ", res.InsertedID)
+	logrus.Info("[createUser] new karma_user created. id: ", res.InsertedID)
 	return nil
 }
 
@@ -83,13 +83,13 @@ func (r *repository) GetSortedUsers(ctx context.Context, seasonID int, limit int
 		&findOptions,
 	)
 	if err != nil {
-		logrus.Fatalln("GetSortedUser fatal error: ", err.Error())
+		logrus.Fatalln("[GetSortedUser] fatal error: ", err.Error())
 		return nil, err
 	}
 
 	var users []karma.User
 	if err = cursor.All(ctx, &users); err != nil {
-		log.Fatalln("GetSortedUser failed to decode user: ", err.Error())
+		log.Fatalln("[GetSortedUser] failed to decode user: ", err.Error())
 		return nil, err
 	}
 	return users, nil

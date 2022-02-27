@@ -27,7 +27,8 @@ func (s *service) AddUserKarma(event *slackevents.MessageEvent) error {
 	defer cancel()
 	season, err := s.karmaRepository.GetCurrentSeason(ctx)
 	if err != nil {
-		logrus.Errorln("AddUserKarma error: ", err.Error())
+		s.slackapiService.PostMessage(event.Channel, "No available season. Please ask to karma master.")
+		return nil
 	}
 
 	giverID := event.User
@@ -47,14 +48,17 @@ func (s *service) AddUserKarma(event *slackevents.MessageEvent) error {
 		if err := s.karmaRepository.AddUserKarma(ctx, season.SeasonID, receiverID, receiverKarma); err != nil {
 			return err
 		}
+		// remain karma log
+		s.karmaRepository.CreateNewLog(ctx, season.SeasonID, receiverID, giverID)
+
 		resultMessage += fmt.Sprintf("<@%s> has gained %0.1f karma.\n", receiverID, receiverKarma)
 		totalReceiverCount += 1
 	}
 	if totalReceiverCount != 0 {
-		if err = s.karmaRepository.AddUserKarma(ctx, season.SeasonID, giverID, giverKarma); err != nil {
+		if err = s.karmaRepository.AddUserKarma(ctx, season.SeasonID, giverID, giverKarma*float64(totalReceiverCount)); err != nil {
 			logrus.Error("failed to add point to giver ", giverID)
 		} else {
-			resultMessage += fmt.Sprintf("<@%s> has gained %0.1f karma.\n", giverID, giverKarma)
+			resultMessage += fmt.Sprintf("<@%s> has gained %0.1f karma.\n", giverID, giverKarma*float64(totalReceiverCount))
 		}
 	}
 	s.slackapiService.PostMessage(event.Channel, resultMessage)

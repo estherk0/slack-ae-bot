@@ -57,6 +57,8 @@ func (ctrl *controller) HandleCommands(c *gin.Context) {
 		}
 		c.Writer.Header().Set("Content-Type", "application/json")
 		c.JSON(http.StatusOK, params)
+	case "/karma":
+		return
 	default:
 		logrus.Warn("Unsupported command! ", s.Command)
 		c.JSON(http.StatusInternalServerError, gin.H{})

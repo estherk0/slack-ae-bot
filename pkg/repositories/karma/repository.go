@@ -16,17 +16,23 @@ type Repository interface {
 	StartNewSeason(ctx context.Context) (int64, error)
 	FinishCurrentSeason(ctx context.Context) error
 	GetSortedUsers(ctx context.Context, seasonID int, limit int64) ([]karma.User, error)
+	CreateNewLog(ctx context.Context, seasonID int, receiverID string, giverID string)
+	SearchLogs(ctx context.Context, seasonID int, receiverID string, days int) ([]karma.Log, error)
 }
 
 type repository struct {
 	userCollection   *mongo.Collection
 	seasonCollection *mongo.Collection
+	logCollection    *mongo.Collection
 }
 
-func NewRepository(userCollection *mongo.Collection, seasonCollection *mongo.Collection) Repository {
+func NewRepository(userCollection *mongo.Collection,
+	seasonCollection *mongo.Collection,
+	logCollection *mongo.Collection) Repository {
 	return &repository{
 		userCollection:   userCollection,
 		seasonCollection: seasonCollection,
+		logCollection:    logCollection,
 	}
 }
 
@@ -34,5 +40,6 @@ func CreateRepository() Repository {
 	return NewRepository(
 		db.GetDB().Collection(userCollectionName),
 		db.GetDB().Collection(seasonCollectionName),
+		db.GetDB().Collection(logCollectionName),
 	)
 }
