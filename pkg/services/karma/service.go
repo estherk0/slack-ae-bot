@@ -13,6 +13,7 @@ type Service interface {
 	StartSeason(event *slackevents.AppMentionEvent) error
 	FinishSeason(event *slackevents.AppMentionEvent) error
 	GetTopKarmaUsers(event *slackevents.AppMentionEvent) error
+	GetHistories(event *slackevents.AppMentionEvent) error
 }
 
 type service struct {

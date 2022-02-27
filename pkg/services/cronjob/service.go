@@ -24,7 +24,10 @@ func NewService(cron *cron.Cron,
 	orgRepository organization.Repository,
 	slackapiService slackapi.Service) Service {
 	return &service{
-		cron: cron,
+		cron:            cron,
+		karmaRepository: karmaRepository,
+		orgRepository:   orgRepository,
+		slackapiService: slackapiService,
 	}
 }
 

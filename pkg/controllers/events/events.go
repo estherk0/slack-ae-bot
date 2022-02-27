@@ -121,9 +121,13 @@ func (ctrl *controller) appMentionEvent(event *slackevents.AppMentionEvent) {
 			} else if strings.Contains(event.Text, "finish") || strings.Contains(event.Text, "end") {
 				ctrl.karmaService.FinishSeason(event)
 			}
-		} else if strings.Contains(event.Text, "my") {
+		} else if strings.Contains(event.Text, "my") { // query current karma point
 			if err := ctrl.karmaService.GetKarmaOfUser(event); err != nil {
 				logrus.Errorf("GetKarmaOfUser error %s", err.Error())
+			}
+		} else if strings.Contains(event.Text, "history") { // query karma history
+			if err := ctrl.karmaService.GetHistories(event); err != nil {
+				logrus.Errorf("GetHistories error %s", err.Error())
 			}
 		} else if strings.Contains(event.Text, "top") { // karma current top list
 			ctrl.karmaService.GetTopKarmaUsers(event)

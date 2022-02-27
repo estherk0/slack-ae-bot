@@ -39,7 +39,7 @@ func (r *repository) FinishCurrentSeason(ctx context.Context) error {
 		return err
 	}
 	if res.ModifiedCount == 0 {
-		return errors.New("no season finished")
+		return errors.New("[FinishCurrentSeason] no season finished")
 	}
 	return nil
 }
@@ -47,11 +47,11 @@ func (r *repository) FinishCurrentSeason(ctx context.Context) error {
 func (r *repository) StartNewSeason(ctx context.Context) (int64, error) {
 	season, _ := r.GetCurrentSeason(ctx)
 	if season != nil {
-		return -1, errors.New("please finish current season first")
+		return -1, errors.New("[StartNewSeason] please finish current season first")
 	}
 	count, err := r.getSeasonTotalCount(ctx)
 	if err != nil {
-		logrus.Error("failed to get season total count ", err.Error())
+		logrus.Error("[StartNewSeason] failed to get season total count ", err.Error())
 		return -1, err
 	}
 	newSeasonID := count + 1
@@ -63,6 +63,6 @@ func (r *repository) StartNewSeason(ctx context.Context) (int64, error) {
 	if err != nil {
 		return -1, err
 	}
-	logrus.Info("new season started season id: ", newSeasonID)
+	logrus.Info("[StartNewSeason] new season started season id: ", newSeasonID)
 	return newSeasonID, nil
 }

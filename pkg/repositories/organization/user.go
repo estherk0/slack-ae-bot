@@ -56,7 +56,7 @@ func (r *repository) AwardMedalToUser(ctx context.Context, userID, source, medal
 		return err
 	}
 	if res.ModifiedCount == 0 {
-		return fmt.Errorf("awardMedalToUser: matching user not found for userID %s" + userID)
+		return fmt.Errorf("[AwardMedalToUser] awardMedalToUser: matching user not found for userID %s" + userID)
 	}
 	return nil
 }
