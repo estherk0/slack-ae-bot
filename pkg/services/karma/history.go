@@ -13,7 +13,7 @@ const (
 	defaultDaysOfHistory = 7
 	historyTemplateStr   = `:eyes: You received total {{ .Count }} points for {{ .Days }} days.
 	{{- range $userID, $point := .Summary }}
-			{{ $point }} points from <@{{ $userID }}>
+			- {{ $point }} points from <@{{ $userID }}>
 	{{- end }}
 	`
 )
