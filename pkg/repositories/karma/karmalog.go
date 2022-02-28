@@ -23,13 +23,9 @@ func (r *repository) CreateNewLog(ctx context.Context, seasonID int, receiverID 
 		GiverID:    giverID,
 		CreatedAt:  time.Now(),
 	}
-	result, err := r.logCollection.InsertOne(ctx, log)
+	_, err := r.logCollection.InsertOne(ctx, log)
 	if err != nil {
 		logrus.Errorf("[CreateNewLog] failed to create karma log for log %v, error: %s", log, err.Error())
-	}
-
-	if result.InsertedID == nil {
-		logrus.Errorf("[CreateNewLog] failed to created karma log, no InsertedID")
 	}
 }
 
