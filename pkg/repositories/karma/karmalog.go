@@ -17,16 +17,18 @@ const (
 )
 
 func (r *repository) CreateNewLog(ctx context.Context, seasonID int, receiverID string, giverID string) {
-	log := karma.Log{
-		SeasonID:   seasonID,
-		ReceiverID: receiverID,
-		GiverID:    giverID,
-		CreatedAt:  time.Now(),
-	}
-	_, err := r.logCollection.InsertOne(ctx, log)
+	res, err := r.logCollection.InsertOne(ctx,
+		bson.M{
+			"season_id":   seasonID,
+			"receiver_id": receiverID,
+			"giver_id":    giverID,
+			"created_at":  time.Now(),
+		},
+	)
 	if err != nil {
-		logrus.Errorf("[CreateNewLog] failed to create karma log for log %v, error: %s", log, err.Error())
+		logrus.Errorf("[CreateNewLog] failed to create karma log. error: %s", err.Error())
 	}
+	logrus.Info("[CreateNewLog] new karma_log created. id: ", res.InsertedID)
 }
 
 func (r *repository) SearchLogs(ctx context.Context, seasonID int, receiverID string, days int) ([]karma.Log, error) {
