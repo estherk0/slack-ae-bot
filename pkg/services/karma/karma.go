@@ -44,12 +44,15 @@ func (s *service) AddUserKarma(event *slackevents.MessageEvent) error {
 		} else if receiverID == botID {
 			resultMessage += fmt.Sprintf("I don't need karma, <@%s>. But I appreciate the thought.\n", giverID)
 			continue
+		} else if s.isDuplicatedKarmaRequest(ctx, season.SeasonID, receiverID, giverID, string(event.EventTimeStamp)) {
+			continue
 		}
+
 		if err := s.karmaRepository.AddUserKarma(ctx, season.SeasonID, receiverID, receiverKarma); err != nil {
 			return err
 		}
 		// remain karma log
-		s.karmaRepository.CreateNewLog(ctx, season.SeasonID, receiverID, giverID)
+		s.karmaRepository.CreateNewLog(ctx, season.SeasonID, receiverID, giverID, string(event.EventTimeStamp))
 
 		resultMessage += fmt.Sprintf("<@%s> has gained %0.1f karma.\n", receiverID, receiverKarma)
 		totalReceiverCount += 1
@@ -63,6 +66,14 @@ func (s *service) AddUserKarma(event *slackevents.MessageEvent) error {
 	}
 	s.slackapiService.PostMessage(event.Channel, resultMessage)
 	return nil
+}
+
+func (s *service) isDuplicatedKarmaRequest(ctx context.Context, seasonID int, receiverID string, giverID string, eventTimestamp string) bool {
+	log, err := s.karmaRepository.GetLog(ctx, seasonID, receiverID, giverID, eventTimestamp)
+	if err != nil || log == nil {
+		return false
+	}
+	return true
 }
 
 func (s *service) GetKarmaOfUser(event *slackevents.AppMentionEvent) error {

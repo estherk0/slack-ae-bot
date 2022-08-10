@@ -16,8 +16,9 @@ type Repository interface {
 	StartNewSeason(ctx context.Context) (int64, error)
 	FinishCurrentSeason(ctx context.Context) error
 	GetSortedUsers(ctx context.Context, seasonID int, limit int64) ([]karma.User, error)
-	CreateNewLog(ctx context.Context, seasonID int, receiverID string, giverID string)
+	CreateNewLog(ctx context.Context, seasonID int, receiverID string, giverID string, eventTimestamp string)
 	SearchLogs(ctx context.Context, seasonID int, receiverID string, days int) ([]karma.Log, error)
+	GetLog(ctx context.Context, seasonID int, receiverID string, giverID string, eventTimestamp string) (*karma.Log, error)
 }
 
 type repository struct {

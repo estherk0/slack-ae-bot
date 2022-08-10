@@ -140,7 +140,8 @@ func (ctrl *controller) appMentionEvent(event *slackevents.AppMentionEvent) {
 }
 
 func (ctrl *controller) messageEvent(event *slackevents.MessageEvent) {
-	logrus.Debugln("Message Event received! ", event.BotID, event.User, event.Channel)
+	logrus.Debugln("Message Event received! ", event.BotID, event.User, event.Channel, event.EventTimeStamp)
+	logrus.Debugln("event.Text ", event.Text)
 	if event.BotID != "" { // Ignore bot message
 		return
 	}
